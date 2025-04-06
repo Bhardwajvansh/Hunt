@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
-import { Search, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Check, Loader } from 'lucide-react';
+import { LinkupClient } from 'linkup-sdk';
 
 export default function Hunt() {
     const [searchText, setSearchText] = useState('');
     const [showResults, setShowResults] = useState(false);
     const [chatMessage, setChatMessage] = useState('');
+
+    const [companies, setCompanies] = useState([
+        "Salesforce", "Oracle", "SAP", "Microsoft", "Adobe", "ServiceNow", "Workday", "Splunk"
+    ]);
+    const [roles, setRoles] = useState([
+        "Vice President of Sales",
+        "Senior Vice President of Sales",
+        "Chief Revenue Officer",
+        "Head of Enterprise Sales",
+        "Global Sales Director"
+    ]);
+
+    const [isCompaniesLoading, setIsCompaniesLoading] = useState(false);
+    const [isRolesLoading, setIsRolesLoading] = useState(false);
+
+    const client = new LinkupClient({ apiKey: import.meta.env.VITE_LINKUP_KEY });
 
     const searchCategories = [
         {
@@ -29,21 +46,84 @@ export default function Hunt() {
         }
     ];
 
-    const roleOptions = [
-        "Vice President of Sales",
-        "Senior Vice President of Sales",
-        "Chief Revenue Officer",
-        "Head of Enterprise Sales",
-        "Global Sales Director"
-    ];
+    const fetchCompanies = async (query) => {
+        setIsCompaniesLoading(true);
+        try {
+            const response = await client.search({
+                query: `give 10 company names as an array related to ${query}`,
+                depth: "standard",
+                outputType: "sourcedAnswer",
+            });
+            console.log("Companies response:", response);
 
-    const companyOptions = [
-        "Salesforce", "Oracle", "SAP", "Microsoft", "Adobe", "ServiceNow", "Workday", "Splunk"
-    ];
+            if (response && response.answer) {
+                const jsonMatch = response.answer.match(/```json\s*(.*?)\s*```/s);
+                if (jsonMatch && jsonMatch[1]) {
+                    const companyArray = JSON.parse(jsonMatch[1]);
+                    setCompanies(companyArray);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching companies:", error);
+        } finally {
+            setIsCompaniesLoading(false);
+        }
+    };
 
-    const handleSearch = () => {
+    const fetchRoles = async (query) => {
+        setIsRolesLoading(true);
+        try {
+            const response = await client.search({
+                query: `give relevant company roles as array related to ${query}`,
+                depth: "standard",
+                outputType: "sourcedAnswer",
+            });
+
+            console.log("Response from roles API:", response);
+
+            if (response && response.answer) {
+                const jsonMatch = response.answer.match(/```json\s*(.*?)\s*```/s);
+                if (jsonMatch && jsonMatch[1]) {
+                    try {
+                        const rolesArray = JSON.parse(jsonMatch[1]);
+                        setRoles(rolesArray);
+                    } catch (parseError) {
+                        console.error("Error parsing roles JSON:", parseError);
+                    }
+                } else {
+                    const rolesList = response.answer.match(/\d+\.\s+(.*?)(?=\s+\d+\.|$)/gs);
+                    if (rolesList && rolesList.length > 0) {
+                        const extractedRoles = rolesList.map(role => {
+                            return role.replace(/^\d+\.\s+/, '').trim();
+                        });
+                        setRoles(extractedRoles);
+                    } else {
+                        const textRoles = response.answer
+                            .split(/[,\n]/)
+                            .map(role => role.replace(/^\d+\.\s+/, '').trim())
+                            .filter(role => role.length > 0);
+
+                        if (textRoles.length > 0) {
+                            setRoles(textRoles);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching roles:", error);
+        } finally {
+            setIsRolesLoading(false);
+        }
+    };
+
+    const handleSearch = async () => {
         if (searchText.trim()) {
-            setShowResults(true);
+            setTimeout(() => {
+                setShowResults(true);
+            }, 300);
+
+            fetchCompanies(searchText);
+            fetchRoles(searchText);
         }
     };
 
@@ -54,11 +134,18 @@ export default function Hunt() {
         }
     };
 
+    const handleChatSubmit = async () => {
+        if (chatMessage.trim()) {
+            fetchCompanies(chatMessage);
+            fetchRoles(chatMessage);
+            setChatMessage('');
+        }
+    };
+
     const handleChatKeyPress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            // Process chat message
-            setChatMessage('');
+            handleChatSubmit();
         }
     };
 
@@ -96,7 +183,7 @@ export default function Hunt() {
                         onKeyDown={handleKeyPress}
                     />
                     <button
-                        className="absolute right-4 bottom-4 bg-white text-black rounded-full p-2 hover:bg-gray-200 transition-colors"
+                        className="absolute right-4 bottom-4 bg-white text-black rounded-full p-2 hover:bg-gray-200 transition-colors flex items-center justify-center"
                         onClick={handleSearch}
                     >
                         <Search size={20} />
@@ -125,7 +212,7 @@ export default function Hunt() {
                             <span className="text-xs">U</span>
                         </div>
                     </div>
-                    <p className="text-sm">Find former VP Sales at public enterprise software companies</p>
+                    <p className="text-sm">{searchText}</p>
                 </div>
 
                 <div className="flex mb-6">
@@ -146,8 +233,15 @@ export default function Hunt() {
                             onChange={(e) => setChatMessage(e.target.value)}
                             onKeyDown={handleChatKeyPress}
                         />
-                        <button className="absolute right-3 bottom-3 bg-white text-black rounded-full p-1 hover:bg-gray-200 transition-colors">
-                            <Search size={16} />
+                        <button
+                            className="absolute right-3 bottom-3 bg-white text-black rounded-full p-1 hover:bg-gray-200 transition-colors flex items-center justify-center"
+                            onClick={handleChatSubmit}
+                            disabled={isCompaniesLoading || isRolesLoading}
+                        >
+                            {isCompaniesLoading || isRolesLoading ?
+                                <Loader size={16} className="animate-spin" /> :
+                                <Search size={16} />
+                            }
                         </button>
                     </div>
                 </div>
@@ -155,53 +249,58 @@ export default function Hunt() {
 
             {/* Main content area */}
             <div className="w-2/3 p-6 overflow-y-auto">
-                <h1 className="text-2xl font-medium mb-6">
-                    Searching for Former Vice Presidents of Sales at public enterprise software companies with experience scaling revenue and leading global sales teams.
-                </h1>
-
                 <div className="mb-8">
                     <div className="flex items-center mb-4">
                         <h2 className="text-xl font-medium">Determining relevant roles</h2>
-                        <Check className="ml-2 text-green-500" size={20} />
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {roleOptions.map((role, index) => (
-                            <div key={index} className="bg-gray-800 rounded-full py-2 px-4 text-sm">
-                                {role}
+                        {isRolesLoading ? (
+                            <div className="ml-2 flex items-center">
+                                <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin ml-2"></div>
+                                <span className="ml-2 text-blue-500 text-sm">Loading roles...</span>
                             </div>
-                        ))}
+                        ) : (
+                            <Check className="ml-2 text-green-500" size={20} />
+                        )}
                     </div>
+                    {isRolesLoading ? (
+                        <div className="flex justify-center items-center h-16">
+                            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-wrap gap-2">
+                            {roles.map((role, index) => (
+                                <div key={index} className="bg-gray-800 rounded-full py-2 px-4 text-sm">
+                                    {role}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="mb-8">
                     <div className="flex items-center mb-4">
                         <h2 className="text-xl font-medium">Researching relevant companies</h2>
-                        <Check className="ml-2 text-green-500" size={20} />
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {companyOptions.map((company, index) => (
-                            <div key={index} className="bg-gray-800 rounded-full py-2 px-4 text-sm">
-                                {company}
+                        {isCompaniesLoading ? (
+                            <div className="ml-2 flex items-center">
+                                <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin ml-2"></div>
+                                <span className="ml-2 text-blue-500 text-sm">Loading companies...</span>
                             </div>
-                        ))}
+                        ) : (
+                            <Check className="ml-2 text-green-500" size={20} />
+                        )}
                     </div>
-                </div>
-
-                <div className="mb-8">
-                    <div className="flex items-center mb-4">
-                        <h2 className="text-xl font-medium">Finding relevant candidates</h2>
-                        <Check className="ml-2 text-green-500" size={20} />
-                    </div>
-                    <div className="w-full bg-gray-800 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full w-full"></div>
-                    </div>
-                </div>
-
-                <div className="mb-8">
-                    <h2 className="text-xl font-medium mb-4">Ranking found candidates</h2>
-                    <div className="w-full bg-gray-800 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full w-1/4"></div>
-                    </div>
+                    {isCompaniesLoading ? (
+                        <div className="flex justify-center items-center h-16">
+                            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-wrap gap-2">
+                            {companies.map((company, index) => (
+                                <div key={index} className="bg-gray-800 rounded-full py-2 px-4 text-sm">
+                                    {company}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
