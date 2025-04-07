@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Check, Loader, ExternalLink } from 'lucide-react';
+import { Search, Check, Loader } from 'lucide-react';
+import { ExternalLink, X, MapPin, Briefcase, Award, BookOpen, Code } from 'lucide-react';
 import { LinkupClient } from 'linkup-sdk';
 
 export default function Hunt() {
@@ -7,6 +8,8 @@ export default function Hunt() {
     const [showResults, setShowResults] = useState(false);
     const [chatMessage, setChatMessage] = useState('');
     const [selectedCompany, setSelectedCompany] = useState(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [selectedLead, setSelectedLead] = useState(null);
     const [leadResults, setLeadResults] = useState([{
         "is_full_data": true,
         "linkedin_id": "396189321",
@@ -1799,6 +1802,151 @@ export default function Hunt() {
                 </div>
             </div>
 
+            {sidebarOpen && selectedLead && (
+                <div className="flex min-h-screen bg-gray-900">
+                    {/* Partial view of main content */}
+                    <div className="flex-1 p-8 bg-gray-900">
+                        <div className="mb-6">
+                            <h1 className="text-3xl font-bold text-gray-100">Lead Details</h1>
+                            <p className="text-gray-400">View detailed information about your selected lead.</p>
+                        </div>
+
+                        <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+                            <p className="text-gray-300">Click on a lead to view their detailed profile information in the sidebar.</p>
+                            <button
+                                onClick={() => setSidebarOpen(true)}
+                                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                            >
+                                Open Lead Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Sidebar */}
+                    {sidebarOpen && selectedLead && (
+                        <div className="fixed inset-0 z-50 overflow-hidden">
+                            {/* Backdrop with blur effect */}
+                            <div
+                                className="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm"
+                                onClick={() => setSidebarOpen(false)}
+                            ></div>
+
+                            {/* Side panel - now positioned on the right */}
+                            <div className="absolute inset-y-0 right-0 max-w-md w-full bg-gray-900 shadow-xl overflow-y-auto transition-transform duration-300 ease-in-out transform border-l border-gray-700">
+                                <div className="p-6 relative">
+                                    {/* Close button - moved to left side */}
+                                    <button
+                                        onClick={() => setSidebarOpen(false)}
+                                        className="absolute top-4 left-4 text-gray-400 hover:text-white bg-gray-800 rounded-full p-2"
+                                    >
+                                        <X size={20} />
+                                    </button>
+
+                                    {/* Profile header */}
+                                    <div className="flex items-center mb-6 mt-4 justify-center">
+                                        <div className="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center mr-4">
+                                            <span className="text-2xl font-bold text-blue-300">{selectedLead.full_name.charAt(0)}</span>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-white">{selectedLead.full_name}</h2>
+                                            <p className="text-blue-400 font-medium">{selectedLead.headline}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Location */}
+                                    <div className="flex items-center text-gray-400 mb-6 justify-center">
+                                        <MapPin size={18} className="mr-2 text-gray-500" />
+                                        <span>{selectedLead.location}</span>
+                                    </div>
+
+                                    {/* Current Position */}
+                                    <div className="mb-6 bg-gray-800 p-4 rounded-lg border border-gray-700">
+                                        <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
+                                            <Briefcase size={18} className="mr-2 text-blue-400" />
+                                            Current Position
+                                        </h3>
+                                        <div>
+                                            <p className="font-medium text-gray-200">{selectedLead.job_title}</p>
+                                            <p className="text-gray-400">{selectedLead.company_name}</p>
+                                            <p className="text-sm text-gray-500">
+                                                {selectedLead.started_at_position} - {selectedLead.job_still_working ? 'Present' : selectedLead.job_ended_on || 'N/A'}
+                                            </p>
+                                            {selectedLead.job_description && (
+                                                <div className="mt-3 text-sm text-gray-400 border-t border-gray-700 pt-3">
+                                                    <p className="whitespace-pre-line">{selectedLead.job_description.substring(0, 300)}...</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Education */}
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
+                                            <BookOpen size={18} className="mr-2 text-blue-400" />
+                                            Education
+                                        </h3>
+                                        {selectedLead.educations.map((edu, index) => (
+                                            <div key={index} className="bg-gray-800 p-4 rounded-lg border border-gray-700 mb-2">
+                                                <p className="font-medium text-gray-200">{edu.degree}</p>
+                                                <p className="text-gray-400">{edu.university_name}</p>
+                                                <p className="text-sm text-gray-500">
+                                                    {edu.started_on?.year ? `${edu.started_on.year} - ${edu.ended_on?.year || 'Present'}` : 'Dates not specified'}
+                                                </p>
+                                                {edu.fields_of_study && edu.fields_of_study.length > 0 && (
+                                                    <p className="text-sm text-gray-400 mt-1">{edu.fields_of_study.join(', ')}</p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Skills */}
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
+                                            <Code size={18} className="mr-2 text-blue-400" />
+                                            Skills
+                                        </h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedLead.skills.map((skill, index) => (
+                                                <span key={index} className="bg-gray-800 text-blue-300 border border-blue-900 px-3 py-1 rounded-full text-sm">
+                                                    {skill}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Certifications */}
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
+                                            <Award size={18} className="mr-2 text-blue-400" />
+                                            Certifications
+                                        </h3>
+                                        {selectedLead.certifications.map((cert, index) => (
+                                            <div key={index} className="bg-gray-800 p-3 rounded-lg border border-gray-700 mb-2">
+                                                <p className="font-medium text-gray-200">{cert.name}</p>
+                                                <p className="text-gray-400 text-sm">{cert.authority}</p>
+                                                {cert.licenseNumber && <p className="text-sm text-gray-500">{cert.licenseNumber}</p>}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* LinkedIn */}
+                                    <div className="mt-6 bg-gray-800 p-4 rounded-lg border border-blue-900">
+                                        <a
+                                            href={selectedLead.linkedin_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-400 hover:text-blue-300 font-medium flex items-center justify-center"
+                                        >
+                                            View LinkedIn Profile <ExternalLink size={16} className="ml-2" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Main content area */}
             <div className="w-2/3 p-6 overflow-y-auto">
                 <div className="mb-8">
@@ -1925,15 +2073,16 @@ export default function Hunt() {
                                                     </td>
                                                     <td className="py-4 px-4 text-sm border-b border-gray-800">
                                                         <div className="flex flex-col space-y-2">
-                                                            <a
-                                                                href={lead.linkedin_url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedLead(lead);
+                                                                    setSidebarOpen(true);
+                                                                }}
                                                                 className="bg-blue-600 text-white px-4 py-1 rounded text-center text-xs flex items-center justify-center"
                                                             >
                                                                 <span>View Profile</span>
                                                                 <ExternalLink size={12} className="ml-1" />
-                                                            </a>
+                                                            </button>
                                                             <button
                                                                 className="border border-gray-600 text-gray-300 px-4 py-1 rounded text-center text-xs"
                                                             >
