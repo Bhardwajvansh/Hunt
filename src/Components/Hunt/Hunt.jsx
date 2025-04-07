@@ -7699,37 +7699,15 @@ export default function Hunt() {
 
             {sidebarOpen && selectedLead && (
                 <div className="flex min-h-screen bg-gray-900">
-                    {/* Partial view of main content */}
-                    <div className="flex-1 p-8 bg-gray-900">
-                        <div className="mb-6">
-                            <h1 className="text-3xl font-bold text-gray-100">Lead Details</h1>
-                            <p className="text-gray-400">View detailed information about your selected lead.</p>
-                        </div>
-
-                        <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-                            <p className="text-gray-300">Click on a lead to view their detailed profile information in the sidebar.</p>
-                            <button
-                                onClick={() => setSidebarOpen(true)}
-                                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                            >
-                                Open Lead Profile
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Sidebar */}
                     {sidebarOpen && selectedLead && (
                         <div className="fixed inset-0 z-50 overflow-hidden">
-                            {/* Backdrop with blur effect */}
                             <div
-                                className="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm"
+                                className="absolute inset-0 backdrop-blur-sm"
                                 onClick={() => setSidebarOpen(false)}
                             ></div>
 
-                            {/* Side panel - now positioned on the right */}
                             <div className="absolute inset-y-0 right-0 max-w-md w-full bg-gray-900 shadow-xl overflow-y-auto transition-transform duration-300 ease-in-out transform border-l border-gray-700">
                                 <div className="p-6 relative">
-                                    {/* Close button - moved to left side */}
                                     <button
                                         onClick={() => setSidebarOpen(false)}
                                         className="absolute top-4 left-4 text-gray-400 hover:text-white bg-gray-800 rounded-full p-2"
@@ -7737,24 +7715,21 @@ export default function Hunt() {
                                         <X size={20} />
                                     </button>
 
-                                    {/* Profile header */}
                                     <div className="flex items-center mb-6 mt-4 justify-center">
                                         <div className="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center mr-4">
                                             <span className="text-2xl font-bold text-blue-300">{selectedLead.full_name.charAt(0)}</span>
                                         </div>
                                         <div>
                                             <h2 className="text-2xl font-bold text-white">{selectedLead.full_name}</h2>
-                                            <p className="text-blue-400 font-medium">{selectedLead.headline}</p>
+                                            <p className="text-blue-400 font-medium">{selectedLead.headline.substring(0, 60)}</p>
                                         </div>
                                     </div>
 
-                                    {/* Location */}
                                     <div className="flex items-center text-gray-400 mb-6 justify-center">
                                         <MapPin size={18} className="mr-2 text-gray-500" />
                                         <span>{selectedLead.location}</span>
                                     </div>
 
-                                    {/* Current Position */}
                                     <div className="mb-6 bg-gray-800 p-4 rounded-lg border border-gray-700">
                                         <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
                                             <Briefcase size={18} className="mr-2 text-blue-400" />
@@ -7774,7 +7749,6 @@ export default function Hunt() {
                                         </div>
                                     </div>
 
-                                    {/* Education */}
                                     <div className="mb-6">
                                         <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
                                             <BookOpen size={18} className="mr-2 text-blue-400" />
@@ -7794,7 +7768,6 @@ export default function Hunt() {
                                         ))}
                                     </div>
 
-                                    {/* Skills */}
                                     <div className="mb-6">
                                         <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
                                             <Code size={18} className="mr-2 text-blue-400" />
@@ -7809,19 +7782,22 @@ export default function Hunt() {
                                         </div>
                                     </div>
 
-                                    {/* Certifications */}
                                     <div className="mb-6">
                                         <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
                                             <Award size={18} className="mr-2 text-blue-400" />
                                             Certifications
                                         </h3>
-                                        {selectedLead.certifications.map((cert, index) => (
-                                            <div key={index} className="bg-gray-800 p-3 rounded-lg border border-gray-700 mb-2">
-                                                <p className="font-medium text-gray-200">{cert.name}</p>
-                                                <p className="text-gray-400 text-sm">{cert.authority}</p>
-                                                {cert.licenseNumber && <p className="text-sm text-gray-500">{cert.licenseNumber}</p>}
-                                            </div>
-                                        ))}
+                                        {selectedLead.certifications.length === 0 ? (
+                                            <p className="text-gray-400 text-sm">Certifications not added.</p>
+                                        ) : (
+                                            selectedLead.certifications.map((cert, index) => (
+                                                <div key={index} className="bg-gray-800 p-3 rounded-lg border border-gray-700 mb-2">
+                                                    <p className="font-medium text-gray-200">{cert.name}</p>
+                                                    <p className="text-gray-400 text-sm">{cert.authority}</p>
+                                                    {cert.licenseNumber && <p className="text-sm text-gray-500">{cert.licenseNumber}</p>}
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
 
                                     {/* LinkedIn */}
