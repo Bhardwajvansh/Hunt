@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ExternalLink, Calendar, Clock, MapPin, Users, MessageCircle, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Lock } from 'lucide-react';
 
 export default function Checkout() {
     const location = useLocation();
@@ -179,6 +179,76 @@ export default function Checkout() {
                         </div>
                     </>
                 );
+            case 'Reachout':
+                return (
+                    <>
+                        <h1 className="text-2xl font-bold mb-2">Reachout Summary</h1>
+                        <div className='p-5 bg-gray-900 w-1/2 flex gap-4 rounded-lg mb-8'>
+                            <Lock size={30} className="text-gray-500 mb-4" />
+                            <p className="text-gray-400">We will provide event summary to the experts. We will never share any of your personal details with them.</p>
+                        </div>
+                        <h1 className="text-2xl font-bold mb-2">Your shortlist of {shortlistedLeads.length} candidates</h1>
+                        <div className="w-full border border-gray-800 rounded-lg overflow-hidden mb-8">
+                            <table className="w-full">
+                                <thead className="bg-gray-900">
+                                    <tr>
+                                        <th className="py-4 px-6 text-left text-sm font-medium">Company</th>
+                                        <th className="py-4 px-6 text-left text-sm font-medium">Job Title</th>
+                                        <th className="py-4 px-6 text-center text-sm font-medium"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {shortlistedLeads.length > 0 ? (
+                                        shortlistedLeads.map((lead, index) => (
+                                            <tr key={index} className="border-t border-gray-800">
+                                                <td className="py-4 px-6">
+                                                    <div className="flex items-center">
+                                                        <div className="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center mr-3">
+                                                            {lead.company_image ? (
+                                                                <img src={lead.company_image} alt={lead.company_name} className="w-10 h-10" />
+                                                            ) : (
+                                                                <span className="text-lg font-bold text-blue-300">
+                                                                    {lead.company_name?.charAt(0) || 'C'}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium">{lead.company_name}</div>
+                                                            <div className="text-gray-400 text-xs">
+                                                                {lead.company_location || lead.location || ""}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-6">
+                                                    <div className="font-medium">{lead.job_title}</div>
+                                                    <div className="text-gray-400 text-xs">
+                                                        {lead.started_at_position && `${lead.started_at_position} - `}
+                                                        {lead.job_still_working ? 'Present' : lead.job_ended_on}
+                                                        {lead.duration && <br />}{lead.duration}
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-6">
+                                                    <div className="flex flex-col items-center space-y-2">
+                                                        <button className="bg-green-700 border border-green-600 text-white px-4 py-1 rounded text-xs flex items-center">
+                                                            Shortlisted ✓
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="py-8 px-6 text-center text-gray-400">
+                                                No candidates have been shortlisted yet.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                );
             case 'Event Details':
                 return (
                     <>
@@ -288,7 +358,6 @@ export default function Checkout() {
 
     return (
         <div className="min-h-screen bg-black text-white p-8">
-            {/* Navigation tabs */}
             <div className="flex mb-8 bg-gray-900 rounded-lg p-1 max-w-xl mx-auto">
                 {tabs.map((tab) => (
                     <button
@@ -312,7 +381,7 @@ export default function Checkout() {
                         onClick={handleNext}
                         className="bg-white text-black px-8 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                     >
-                        {activeTab === 'Reachout' ? 'Finish' : 'Next'}
+                        {activeTab === 'Reachout' ? 'Start Reachout' : 'Next'}
                     </button>
                 </div>
             </div>
