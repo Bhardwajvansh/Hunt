@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {useNavigate} from 'react-router-dom';
 import { Search, Check, Loader } from 'lucide-react';
 import { ExternalLink, X, MapPin, Briefcase, Award, BookOpen, Code } from 'lucide-react';
 import { LinkupClient } from 'linkup-sdk';
@@ -6,10 +7,12 @@ import { LinkupClient } from 'linkup-sdk';
 export default function Hunt() {
     const [searchText, setSearchText] = useState('');
     const [showResults, setShowResults] = useState(false);
+    const navigate = useNavigate();
     const [chatMessage, setChatMessage] = useState('');
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [selectedLead, setSelectedLead] = useState(null);
+    const [shortlistedLeads, setShortlistedLeads] = useState([]);
     const [leadResults, setLeadResults] = useState([{
         "is_full_data": true,
         "linkedin_id": "396189321",
@@ -1556,7 +1559,6 @@ export default function Hunt() {
                 depth: "standard",
                 outputType: "sourcedAnswer",
             });
-            console.log("Companies response:", response);
 
             if (response && response.answer) {
                 const jsonMatch = response.answer.match(/```json\s*(.*?)\s*```/s);
@@ -1580,8 +1582,6 @@ export default function Hunt() {
                 depth: "standard",
                 outputType: "sourcedAnswer",
             });
-
-            console.log("Response from roles API:", response);
 
             if (response && response.answer) {
                 const jsonMatch = response.answer.match(/```json\s*(.*?)\s*```/s);
@@ -1644,6 +1644,16 @@ export default function Hunt() {
             console.error("Error fetching leads:", error);
         } finally {
             setIsLeadsLoading(false);
+        }
+    };
+
+    const handleShortlist = (lead) => {
+        if (shortlistedLeads.some(shortlistedLead => shortlistedLead.linkedin_url === lead.linkedin_url)) {
+            setShortlistedLeads(shortlistedLeads.filter(
+                shortlistedLead => shortlistedLead.linkedin_url !== lead.linkedin_url
+            ));
+        } else {
+            setShortlistedLeads([...shortlistedLeads, lead]);
         }
     };
 
@@ -2006,14 +2016,25 @@ export default function Hunt() {
                 {/* Leads Results Table */}
                 {selectedCompany && (
                     <div className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <h2 className="text-xl font-medium">Potential experts at {selectedCompany}</h2>
-                            {isLeadsLoading ? (
-                                <div className="ml-2 flex items-center">
-                                </div>
-                            ) : (
-                                <Check className="ml-2 text-green-500" size={20} />
-                            )}
+                        <div className="flex justify-between items-center mb-4">
+                            <div className='flex items-center py-2'>
+                                <h2 className="text-xl font-medium">Potential experts at {selectedCompany}</h2>
+                                {isLeadsLoading ? (
+                                    <div className="ml-2 flex items-center"></div>
+                                ) : (
+                                    <Check className="ml-2 text-green-500" size={20} />
+                                )}
+                            </div>
+                            <div className="flex items-center">
+                                {shortlistedLeads.length > 0 && (
+                                    <button
+                                        onClick={() => navigate('/checkout', { state: { shortlistedLeads } })}
+                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+                                    >
+                                        Go to checkout ({shortlistedLeads.length})
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {isLeadsLoading ? (
@@ -2084,9 +2105,15 @@ export default function Hunt() {
                                                                 <ExternalLink size={12} className="ml-1" />
                                                             </button>
                                                             <button
-                                                                className="border border-gray-600 text-gray-300 px-4 py-1 rounded text-center text-xs"
+                                                                onClick={() => handleShortlist(lead)}
+                                                                className={`border px-4 py-1 rounded text-center text-xs ${shortlistedLeads.some(shortlistedLead => shortlistedLead.linkedin_url === lead.linkedin_url)
+                                                                    ? "bg-green-700 border-green-600 text-white"
+                                                                    : "border-gray-600 text-gray-300"
+                                                                    }`}
                                                             >
-                                                                Add to Shortlist
+                                                                {shortlistedLeads.some(shortlistedLead => shortlistedLead.linkedin_url === lead.linkedin_url)
+                                                                    ? "Shortlisted"
+                                                                    : "Add to Shortlist"}
                                                             </button>
                                                         </div>
                                                     </td>
