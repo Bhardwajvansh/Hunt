@@ -1526,22 +1526,22 @@ export default function Hunt() {
         {
             id: 1,
             title: "Search by Role",
-            description: "Find former VP Sales at public enterprise software companies"
+            description: "Find senior cybersecurity leaders who have held roles like CISO or VP Security at Fortune 500 companies, ideal for keynote sessions on enterprise security."
         },
         {
             id: 2,
             title: "Search by Experience",
-            description: "Find traders with more than 5 years experience at large prop trading firms in the US"
+            description: "Find product managers with over 8 years of experience in AI/ML across top-tier startups or FAANG companies to lead a panel on emerging AI trends."
         },
         {
             id: 3,
             title: "Search by Expertise",
-            description: "Find people who focus on sustainable supply chains for large retailers"
+            description: "Find thought leaders with expertise in sustainability strategy and carbon-neutral innovation for a workshop on green business transformation."
         },
         {
             id: 4,
             title: "Search for Similar People",
-            description: "Find AI product leaders like https://www.linkedin.com/in/mghissasi/"
+            description: "Find digital transformation speakers similar to [https://www.linkedin.com/in/mghissasi/] who can engage audiences with practical insights on tech-driven business models."
         }
     ];
 
@@ -1704,39 +1704,42 @@ export default function Hunt() {
 
     const renderInitialSearch = () => (
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
-            <div className="max-w-4xl w-full">
-                <h1 className="text-6xl">Welcome to Delight Loop.</h1>
-                <br />
-                <h1 className="text-md font-medium">Let's get started and find you experts. Tell me what you're looking for.</h1>
-                <br />
+            <div className="max-w-4xl w-full space-y-8">
+                <div className="space-y-2">
+                    <h1 className="text-6xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Welcome to DELIGHT LOOP.</h1>
+                    <h2 className="text-lg font-medium text-gray-300">Let's get started and find you experts.</h2>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     {searchCategories.map((category) => (
                         <div
                             key={category.id}
-                            className="bg-gray-900 rounded-lg p-4 cursor-pointer hover:bg-gray-800 transition-colors"
+                            className="bg-gray-900 rounded-xl p-6 cursor-pointer hover:bg-gray-800 transition-all duration-300 border border-gray-800 shadow-lg hover:shadow-xl hover:border-gray-700 transform hover:-translate-y-1"
                             onClick={() => handleCategoryClick(category)}
                         >
-                            <h2 className="text-xl font-medium mb-2">{category.title}</h2>
+                            <h2 className="text-xl font-semibold mb-3">{category.title}</h2>
                             <p className="text-gray-400">{category.description}</p>
                         </div>
                     ))}
                 </div>
 
-                <div className="relative">
-                    <textarea
-                        className="w-full p-4 pr-12 bg-gray-900 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-gray-700 text-white placeholder-gray-500 resize-none h-24"
-                        placeholder="Describe the experts you are looking for..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                    />
-                    <button
-                        className="absolute right-4 bottom-4 bg-white text-black rounded-full p-2 hover:bg-gray-200 transition-colors flex items-center justify-center"
-                        onClick={handleSearch}
-                    >
-                        <Search size={20} />
-                    </button>
+                <div className="relative group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl blur opacity-50 group-hover:opacity-75 transition duration-300"></div>
+                    <div className="relative">
+                        <textarea
+                            className="w-full p-5 pr-14 bg-gray-900 rounded-xl border border-gray-800 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-white placeholder-gray-500 resize-none h-28 shadow-lg"
+                            placeholder="Describe the experts you are looking for..."
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            onKeyDown={handleKeyPress}
+                        />
+                        <button
+                            className="absolute right-4 bottom-4 bg-white text-black rounded-full p-3 hover:bg-gray-200 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105"
+                            onClick={handleSearch}
+                        >
+                            <Search size={20} />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1803,8 +1806,6 @@ export default function Hunt() {
                         <h2 className="text-xl font-medium">Determining relevant roles</h2>
                         {isRolesLoading ? (
                             <div className="ml-2 flex items-center">
-                                <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin ml-2"></div>
-                                <span className="ml-2 text-blue-500 text-sm">Loading roles...</span>
                             </div>
                         ) : (
                             <Check className="ml-2 text-green-500" size={20} />
@@ -1830,8 +1831,6 @@ export default function Hunt() {
                         <h2 className="text-xl font-medium">Researching relevant companies</h2>
                         {isCompaniesLoading ? (
                             <div className="ml-2 flex items-center">
-                                <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin ml-2"></div>
-                                <span className="ml-2 text-blue-500 text-sm">Loading companies...</span>
                             </div>
                         ) : (
                             <Check className="ml-2 text-green-500" size={20} />
@@ -1863,8 +1862,6 @@ export default function Hunt() {
                             <h2 className="text-xl font-medium">Potential experts at {selectedCompany}</h2>
                             {isLeadsLoading ? (
                                 <div className="ml-2 flex items-center">
-                                    <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin ml-2"></div>
-                                    <span className="ml-2 text-blue-500 text-sm">Loading profiles...</span>
                                 </div>
                             ) : (
                                 <Check className="ml-2 text-green-500" size={20} />
