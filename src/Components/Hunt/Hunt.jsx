@@ -1705,7 +1705,7 @@ export default function Hunt() {
     const renderInitialSearch = () => (
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
             <div className="max-w-4xl w-full">
-                <h1 className="text-6xl">Welcome to Hunt.</h1>
+                <h1 className="text-6xl">Welcome to Delight Loop.</h1>
                 <br />
                 <h1 className="text-md font-medium">Let's get started and find you experts. Tell me what you're looking for.</h1>
                 <br />
@@ -1752,7 +1752,7 @@ export default function Hunt() {
                         <div className="w-6 h-0.5 bg-white mb-1"></div>
                         <div className="w-6 h-0.5 bg-white"></div>
                     </div>
-                    <p className="text-sm">Welcome to Hunt. Let's get started and find you experts. Tell me what you're looking for.</p>
+                    <p className="text-sm">Welcome to Delight Loop. Let's get started and find you experts. Tell me what you're looking for.</p>
                 </div>
 
                 <div className="flex mb-6">
