@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Check, Loader } from 'lucide-react';
 import { ExternalLink, X, MapPin, Briefcase, Award, BookOpen, Code } from 'lucide-react';
 import { LinkupClient } from 'linkup-sdk';
+import axios from 'axios';
 
 export default function Hunt() {
     const [searchText, setSearchText] = useState('');
@@ -7398,7 +7399,7 @@ export default function Hunt() {
     const [isLeadsLoading, setIsLeadsLoading] = useState(false);
 
     const [companies, setCompanies] = useState([
-        "Salesforce", "Oracle", "SAP", "Microsoft", "Adobe", "ServiceNow", "Workday", "Splunk"
+        "Microsoft", "Apple", "Tesla", "Google", "Adobe", "ServiceNow", "Workday", "Splunk"
     ]);
     const [roles, setRoles] = useState([
         "Vice President of Sales",
@@ -7506,24 +7507,20 @@ export default function Hunt() {
     const fetchLeadsByCompany = async (company) => {
         setIsLeadsLoading(true);
         try {
-            const options = {
+            const response = await axios({
                 method: 'POST',
+                url: '/api/linkedin/leads/by_icp/',
                 headers: {
                     Authorization: `Token ${import.meta.env.VITE_GENERECT_KEY}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
+                data: {
                     company_link: `https://www.linkedin.com/company/${encodeURIComponent(company)}`,
                     limit_by: 10
-                })
-            };
-
-            const response = await fetch('https://api.generect.com/api/linkedin/leads/by_icp/', options);
-            const data = await response.json();
-
-            console.log("Leads data:", data);
-            if (data && data.leads) {
-                setLeadResults(data.leads);
+                }
+            });
+            if (response.data && response.data.leads) {
+                setLeadResults(response.data.leads);
             }
         } catch (error) {
             console.error("Error fetching leads:", error);

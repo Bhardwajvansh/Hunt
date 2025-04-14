@@ -344,13 +344,6 @@ export default function Checkout() {
                         )}
                     </>
                 );
-            case 'Reachout':
-                return (
-                    <div className="text-center py-12">
-                        <h2 className="text-2xl font-bold mb-4">Reachout Configuration</h2>
-                        <p className="text-gray-400">This tab will allow you to configure how to reach out to candidates.</p>
-                    </div>
-                );
             default:
                 return null;
         }
