@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Check, Loader } from 'lucide-react';
-import { ExternalLink, X, MapPin, Briefcase, Award, BookOpen, Code, MessageSquare, User } from 'lucide-react';
+import { ExternalLink, X, MapPin, Briefcase, Award, BookOpen, Code, MessageSquare, User, RefreshCw } from 'lucide-react';
 import { Users, Star, UserPlus } from "lucide-react";
 import { LinkupClient } from 'linkup-sdk';
 import axios from 'axios';
@@ -335,11 +335,21 @@ export default function Hunt() {
         <div className="flex h-screen bg-black text-white">
             {/* Left sidebar - Chat history */}
             <div className="w-1/3 border-r border-gray-800 p-4 flex flex-col h-full bg-black text-white">
-                <div className="flex items-center mb-6">
-                    <div className="mr-3 bg-gray-800 p-2 rounded">
-                        <MessageSquare size={18} className="text-indigo-400" />
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center">
+                        <div className="mr-3 bg-gray-800 p-2 rounded">
+                            <MessageSquare size={18} className="text-indigo-400" />
+                        </div>
+                        <p className="text-sm font-medium">Conversation History</p>
                     </div>
-                    <p className="text-sm font-medium">Conversation History</p>
+
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-gray-800 p-2 rounded hover:bg-gray-700 transition-colors duration-300 group flex items-center justify-center"
+                        title="Clear chat and restart search"
+                    >
+                        <RefreshCw size={16} className="text-gray-400 group-hover:text-indigo-400 transition-colors duration-300 group-hover:rotate-180 transform group-active:rotate-360 transition-transform" />
+                    </button>
                 </div>
 
                 <div className="flex-grow overflow-y-auto mb-4 space-y-6 pr-2 custom-scrollbar">
