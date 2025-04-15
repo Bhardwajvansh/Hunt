@@ -58,7 +58,13 @@ export default function Checkout() {
         }
 
         if (activeTab === 'Reachout') {
-            navigate('/');
+            navigate('/reachout', {
+                state: {
+                    shortlistedLeads,
+                    eventDetails,
+                    screeningQuestions
+                }
+            });
         }
     };
 
