@@ -122,6 +122,7 @@ export default function Checkout() {
                             <table className="w-full">
                                 <thead className="bg-gray-900">
                                     <tr>
+                                        <th className="py-4 px-6 text-left text-sm font-medium">Person</th>
                                         <th className="py-4 px-6 text-left text-sm font-medium">Company</th>
                                         <th className="py-4 px-6 text-left text-sm font-medium">Job Title</th>
                                         <th className="py-4 px-6 text-center text-sm font-medium"></th>
@@ -131,6 +132,9 @@ export default function Checkout() {
                                     {shortlistedLeads.length > 0 ? (
                                         shortlistedLeads.map((lead, index) => (
                                             <tr key={index} className="border-t border-gray-800">
+                                                <td className="py-4 px-6">
+                                                    <div className="font-medium text-white">{lead.full_name}</div>
+                                                </td>
                                                 <td className="py-4 px-6">
                                                     <div className="flex items-center">
                                                         <div className="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center mr-3">
@@ -192,6 +196,7 @@ export default function Checkout() {
                             <table className="w-full">
                                 <thead className="bg-gray-900">
                                     <tr>
+                                        <th className="py-4 px-6 text-left text-sm font-medium">Person</th>
                                         <th className="py-4 px-6 text-left text-sm font-medium">Company</th>
                                         <th className="py-4 px-6 text-left text-sm font-medium">Job Title</th>
                                         <th className="py-4 px-6 text-center text-sm font-medium"></th>
@@ -201,6 +206,9 @@ export default function Checkout() {
                                     {shortlistedLeads.length > 0 ? (
                                         shortlistedLeads.map((lead, index) => (
                                             <tr key={index} className="border-t border-gray-800">
+                                                <td className="py-4 px-6">
+                                                    <div className="font-medium text-white">{lead.full_name}</div>
+                                                </td>
                                                 <td className="py-4 px-6">
                                                     <div className="flex items-center">
                                                         <div className="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center mr-3">

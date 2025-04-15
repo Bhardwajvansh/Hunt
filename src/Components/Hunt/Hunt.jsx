@@ -54,7 +54,7 @@ export default function Hunt() {
     const [isCompaniesLoading, setIsCompaniesLoading] = useState(false);
     const [isRolesLoading, setIsRolesLoading] = useState(false);
 
-    const client = new LinkupClient({ apiKey: import.meta.env.VITE_LINKUP_KEY });
+    const client = new LinkupClient({ apiKey: import.meta.env.VITE_LINKUP });
 
     const searchCategories = [
         {
@@ -636,6 +636,9 @@ export default function Hunt() {
                                     <thead className="sticky top-0 bg-gray-900 z-10">
                                         <tr>
                                             <th className="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider border-b border-gray-800">
+                                                Person
+                                            </th>
+                                            <th className="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider border-b border-gray-800">
                                                 Company
                                             </th>
                                             <th className="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider border-b border-gray-800">
@@ -653,6 +656,9 @@ export default function Hunt() {
                                         {leadResults.length > 0 ? (
                                             leadResults.map((lead, index) => (lead.company_name === selectedCompany && (
                                                 <tr key={index} className={index % 2 === 0 ? "bg-gray-900" : "bg-black"}>
+                                                    <td className="py-4 px-4 text-sm border-b border-gray-800">
+                                                        <div className="font-medium text-white">{lead.full_name}</div>
+                                                    </td>
                                                     <td className="py-4 px-4 text-sm border-b border-gray-800">
                                                         <div className="flex items-center">
                                                             {lead.company_image && (
@@ -710,7 +716,7 @@ export default function Hunt() {
                                             )))
                                         ) : (
                                             <tr>
-                                                <td colSpan="4" className="py-4 px-4 text-center text-gray-400 border-b border-gray-800">
+                                                <td colSpan="5" className="py-4 px-4 text-center text-gray-400 border-b border-gray-800">
                                                     No leads found for this company.
                                                 </td>
                                             </tr>
