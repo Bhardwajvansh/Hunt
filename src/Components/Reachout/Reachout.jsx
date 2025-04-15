@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Mail, Linkedin, Phone, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Reachout() {
+    const navigate = useNavigate();
     const location = useLocation();
     const { shortlistedLeads, eventDetails, screeningQuestions } = location.state || {
         shortlistedLeads: [],
@@ -131,7 +133,11 @@ export default function Reachout() {
                                                 </button>
                                                 <button
                                                     className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
-                                                    title="LinkedIn"
+                                                    title="Message on LinkedIn"
+                                                    onClick={() => {
+                                                        const messageUrl = `${lead.linkedin_url.replace(/\/$/, '')}/overlay/message/`;
+                                                        window.open(messageUrl, '_blank');
+                                                    }}
                                                 >
                                                     <Linkedin size={20} />
                                                 </button>
@@ -164,7 +170,7 @@ export default function Reachout() {
                         Back
                     </button>
                     <button
-                        onClick={() => alert('Reachout process complete!')}
+                        onClick={() => navigate('/')}
                         className="bg-white text-black px-8 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                     >
                         Complete
@@ -206,17 +212,20 @@ export default function Reachout() {
                             >
                                 Copy to Clipboard
                             </button>
-                            <button
-                                onClick={() => window.open(`mailto:${selectedLead?.email || ''}?subject=Speaking Opportunity&body=${encodeURIComponent(emailContent)}`, '_blank')}
-                                className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 transition-colors"
-                                disabled={isGeneratingEmail}
+                            <a
+                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${selectedLead?.email || 'vansh.bhardwaj@kareai.io'}&su=${encodeURIComponent('Speaking Opportunity')}&body=${encodeURIComponent(emailContent)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`bg-white text-black px-4 py-2 rounded hover:bg-gray-200 transition-colors inline-block text-center ${isGeneratingEmail ? 'opacity-50 pointer-events-none' : ''}`}
                             >
-                                Open in Email Client
-                            </button>
+                                Open in Mail Client
+                            </a>
+
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
