@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Check, Loader } from 'lucide-react';
 import { ExternalLink, X, MapPin, Briefcase, Award, BookOpen, Code } from 'lucide-react';
+import { Users, Star, UserPlus } from "lucide-react";
 import { LinkupClient } from 'linkup-sdk';
 import axios from 'axios';
 
@@ -41,22 +42,26 @@ export default function Hunt() {
         {
             id: 1,
             title: "Search by Role",
-            description: "Find senior cybersecurity leaders who have held roles like CISO or VP Security at Fortune 500 companies, ideal for keynote sessions on enterprise security."
+            description: "Find senior cybersecurity leaders from Fortune 500 companies for keynote sessions.",
+            icon: <Briefcase className="text-indigo-400" size={24} />
         },
         {
             id: 2,
             title: "Search by Experience",
-            description: "Find product managers with over 8 years of experience in AI/ML across top-tier startups or FAANG companies to lead a panel on emerging AI trends."
+            description: "Find product managers with 8+ years in AI/ML from top startups or FAANG companies.",
+            icon: <Star className="text-amber-400" size={24} />
         },
         {
             id: 3,
             title: "Search by Expertise",
-            description: "Find thought leaders with expertise in sustainability strategy and carbon-neutral innovation for a workshop on green business transformation."
+            description: "Find thought leaders in sustainability for workshops on green business transformation.",
+            icon: <Users className="text-emerald-400" size={24} />
         },
         {
             id: 4,
             title: "Search for Similar People",
-            description: "Find digital transformation speakers similar to [https://www.linkedin.com/in/mghissasi/] who can engage audiences with practical insights on tech-driven business models."
+            description: "Find speakers similar to specific experts for insights on digital transformation.",
+            icon: <UserPlus className="text-blue-400" size={24} />
         }
     ];
 
@@ -240,36 +245,45 @@ export default function Hunt() {
     const renderInitialSearch = () => (
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
             <div className="max-w-4xl w-full space-y-8">
-                <div className="space-y-2">
-                    <h1 className="text-6xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Welcome to DELIGHT LOOP.</h1>
-                    <h2 className="text-lg font-medium text-gray-300">Let's get started and find you experts.</h2>
+                <div className="space-y-2 text-center mb-8">
+                    <h1 className="text-6xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent transition-all duration-500 hover:bg-gradient-to-r hover:from-white hover:to-blue-400">
+                        Welcome to DELIGHT LOOP.
+                    </h1>
+                    <h2 className="text-lg font-medium text-gray-300">Let's find the perfect experts for you.</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                     {searchCategories.map((category) => (
                         <div
                             key={category.id}
-                            className="bg-gray-900 rounded-xl p-6 cursor-pointer hover:bg-gray-800 transition-all duration-300 border border-gray-800 shadow-lg hover:shadow-xl hover:border-gray-700 transform hover:-translate-y-1"
+                            className="bg-gray-900 rounded-xl p-6 cursor-pointer hover:bg-gray-800 transition-all duration-300 border border-gray-800 shadow-lg hover:shadow-xl hover:border-indigo-900 transform hover:-translate-y-1 group"
                             onClick={() => handleCategoryClick(category)}
                         >
-                            <h2 className="text-xl font-semibold mb-3">{category.title}</h2>
-                            <p className="text-gray-400">{category.description}</p>
+                            <div className="flex items-start space-x-4">
+                                <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-gray-700 transition-all duration-300">
+                                    {category.icon}
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-semibold mb-2 group-hover:text-indigo-300 transition-colors duration-300">{category.title}</h2>
+                                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">{category.description}</p>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
 
                 <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl blur opacity-50 group-hover:opacity-75 transition duration-300"></div>
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-700 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-500 animate-pulse group-hover:animate-none"></div>
                     <div className="relative">
                         <textarea
-                            className="w-full p-5 pr-14 bg-gray-900 rounded-xl border border-gray-800 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-white placeholder-gray-500 resize-none h-28 shadow-lg"
+                            className="w-full p-5 pr-14 bg-gray-900 rounded-xl border border-gray-800 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent text-white placeholder-gray-500 resize-none h-28 shadow-lg transition-all duration-300"
                             placeholder="Describe the experts you are looking for..."
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                             onKeyDown={handleKeyPress}
                         />
                         <button
-                            className="absolute right-4 bottom-4 bg-white text-black rounded-full p-3 hover:bg-gray-200 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105"
+                            className="absolute right-4 bottom-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full p-3 hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-110"
                             onClick={handleSearch}
                         >
                             <Search size={20} />
