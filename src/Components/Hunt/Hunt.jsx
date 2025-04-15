@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Check, Loader } from 'lucide-react';
-import { ExternalLink, X, MapPin, Briefcase, Award, BookOpen, Code } from 'lucide-react';
+import { ExternalLink, X, MapPin, Briefcase, Award, BookOpen, Code, MessageSquare, User } from 'lucide-react';
 import { Users, Star, UserPlus } from "lucide-react";
 import { LinkupClient } from 'linkup-sdk';
 import axios from 'axios';
@@ -31,6 +31,24 @@ export default function Hunt() {
         "Chief Revenue Officer",
         "Head of Enterprise Sales",
         "Global Sales Director"
+    ]);
+
+    const [chatHistory, setChatHistory] = useState([
+        {
+            id: 1,
+            type: "assistant",
+            message: "Welcome to Delight Loop. Let's get started and find you experts. Tell me what you're looking for."
+        },
+        {
+            id: 2,
+            type: "user",
+            message: searchText || "I need experts in cybersecurity with leadership experience."
+        },
+        {
+            id: 3,
+            type: "assistant",
+            message: `Great, let's begin the search for experts in ${selectedCompany ? selectedCompany : "relevant companies"}.`
+        }
     ]);
 
     const [isCompaniesLoading, setIsCompaniesLoading] = useState(false);
@@ -202,12 +220,31 @@ export default function Hunt() {
         }
     };
 
-    const handleChatSubmit = async () => {
+    const handleChatSubmit = () => {
         if (chatMessage.trim()) {
             fetchCompanies(chatMessage);
             fetchRoles(chatMessage);
             setChatMessage('');
         }
+        if (!chatMessage.trim()) return;
+        const newUserMessage = {
+            id: chatHistory.length + 1,
+            type: "user",
+            message: chatMessage
+        };
+        setChatHistory([...chatHistory, newUserMessage]);
+        setChatMessage("");
+        setIsCompaniesLoading(true);
+        setTimeout(() => {
+            const assistantResponse = {
+                id: chatHistory.length + 2,
+                type: "assistant",
+                message: `I've refined the search based on your request for "${chatMessage}". Here are the updated results.`
+            };
+
+            setChatHistory(prev => [...prev, assistantResponse]);
+            setIsCompaniesLoading(false);
+        }, 1500);
     };
 
     const handleChatKeyPress = (e) => {
@@ -297,52 +334,82 @@ export default function Hunt() {
     const renderSearchResults = () => (
         <div className="flex h-screen bg-black text-white">
             {/* Left sidebar - Chat history */}
-            <div className="w-1/3 border-r border-gray-800 p-4 flex flex-col">
+            <div className="w-1/3 border-r border-gray-800 p-4 flex flex-col h-full bg-black text-white">
                 <div className="flex items-center mb-6">
-                    <div className="mr-4">
-                        <div className="w-6 h-0.5 bg-white mb-1"></div>
-                        <div className="w-6 h-0.5 bg-white mb-1"></div>
-                        <div className="w-6 h-0.5 bg-white"></div>
+                    <div className="mr-3 bg-gray-800 p-2 rounded">
+                        <MessageSquare size={18} className="text-indigo-400" />
                     </div>
-                    <p className="text-sm">Welcome to Delight Loop. Let's get started and find you experts. Tell me what you're looking for.</p>
+                    <p className="text-sm font-medium">Conversation History</p>
                 </div>
 
-                <div className="flex mb-6">
-                    <div className="mr-4">
-                        <div className="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center">
-                            <span className="text-xs">U</span>
+                <div className="flex-grow overflow-y-auto mb-4 space-y-6 pr-2 custom-scrollbar">
+                    {chatHistory.map((chat) => (
+                        <div key={chat.id} className="flex">
+                            {chat.type === "assistant" ? (
+                                <>
+                                    <div className="mr-3 flex-shrink-0">
+                                        <div className="w-7 h-7 flex flex-col justify-center items-center">
+                                            <div className="w-5 h-0.5 bg-white mb-1"></div>
+                                            <div className="w-5 h-0.5 bg-white mb-1"></div>
+                                            <div className="w-5 h-0.5 bg-white"></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex-grow">
+                                        <p className="text-sm text-gray-300">{chat.message}</p>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="mr-3 flex-shrink-0">
+                                        <div className="w-7 h-7 bg-purple-700 rounded-full flex items-center justify-center">
+                                            <User size={14} />
+                                        </div>
+                                    </div>
+                                    <div className="flex-grow">
+                                        <p className="text-sm">{chat.message}</p>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    </div>
-                    <p className="text-sm">{searchText}</p>
+                    ))}
+
+                    {isCompaniesLoading && (
+                        <div className="flex">
+                            <div className="mr-3 flex-shrink-0">
+                                <div className="w-7 h-7 flex flex-col justify-center items-center">
+                                    <div className="w-5 h-0.5 bg-white mb-1 animate-pulse"></div>
+                                    <div className="w-5 h-0.5 bg-white mb-1 animate-pulse"></div>
+                                    <div className="w-5 h-0.5 bg-white animate-pulse"></div>
+                                </div>
+                            </div>
+                            <div className="flex-grow">
+                                <div className="h-4 w-16 bg-gray-800 rounded animate-pulse mb-2"></div>
+                                <div className="h-4 w-32 bg-gray-800 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                <div className="flex mb-6">
-                    <div className="mr-4">
-                        <div className="w-6 h-0.5 bg-white mb-1"></div>
-                        <div className="w-6 h-0.5 bg-white mb-1"></div>
-                        <div className="w-6 h-0.5 bg-white"></div>
-                    </div>
-                    <p className="text-sm">Great, let's begin the search for experts in {selectedCompany ? selectedCompany : "relevant companies"}.</p>
-                </div>
-
-                <div className="mt-auto">
+                <div className="mt-auto relative group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
                     <div className="relative">
                         <textarea
-                            className="w-full p-3 pr-10 bg-gray-900 rounded-lg border-none focus:outline-none focus:ring-1 focus:ring-gray-700 text-white placeholder-gray-500 resize-none h-20 text-sm"
+                            className="w-full p-3 pr-10 bg-gray-900 rounded-lg border-none focus:outline-none focus:ring-1 focus:ring-gray-700 text-white placeholder-gray-500 resize-none h-20 text-sm transition-all duration-300"
                             placeholder="How would you like to refine the results?"
                             value={chatMessage}
                             onChange={(e) => setChatMessage(e.target.value)}
                             onKeyDown={handleChatKeyPress}
                         />
                         <button
-                            className="absolute right-3 bottom-3 bg-white text-black rounded-full p-1 hover:bg-gray-200 transition-colors flex items-center justify-center"
+                            className="absolute right-3 bottom-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full p-2 hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 flex items-center justify-center transform hover:scale-105"
                             onClick={handleChatSubmit}
                             disabled={isCompaniesLoading || isRolesLoading}
                         >
-                            {isCompaniesLoading || isRolesLoading ?
-                                <Loader size={16} className="animate-spin" /> :
+                            {isCompaniesLoading || isRolesLoading ? (
+                                <Loader size={16} className="animate-spin" />
+                            ) : (
                                 <Search size={16} />
-                            }
+                            )}
                         </button>
                     </div>
                 </div>
