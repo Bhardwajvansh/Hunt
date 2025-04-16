@@ -171,7 +171,11 @@ export default function Hunt() {
         try {
             const response = await axios({
                 method: 'POST',
-                url: '/api/linkedin-proxy',
+                url: '/api/linkedin/leads/by_icp/',
+                headers: {
+                    Authorization: `Token ${import.meta.env.VITE_GENERECT_KEY}`,
+                    'Content-Type': 'application/json'
+                },
                 data: {
                     company_link: `https://www.linkedin.com/company/${encodeURIComponent(company)}`,
                     limit_by: 10,
