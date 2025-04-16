@@ -9,12 +9,7 @@ export default defineConfig({
       '/api/linkedin': {
         target: 'https://api.generect.com',
         changeOrigin: true,
-        "rewrites": [
-          {
-            "source": "/api/linkedin/:path*",
-            "destination": "https://api.generect.com/api/linkedin/:path*"
-          }
-        ]
+        rewrite: (path) => path.replace(/^\/api\/linkedin/, '/api/linkedin')
       },
       '/api/linkedin/email_finder': {
         target: 'https://api.generect.com',
