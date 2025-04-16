@@ -171,7 +171,7 @@ export default function Hunt() {
         try {
             const response = await axios({
                 method: 'POST',
-                url: 'https://api.generect.com/api/linkedin/leads/by_icp/',
+                url: '/api/linkedin/leads/by_icp',
                 headers: {
                     Authorization: `Token ${import.meta.env.VITE_GENERECT_KEY}`,
                     'Content-Type': 'application/json'
