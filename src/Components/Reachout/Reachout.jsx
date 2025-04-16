@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Mail, Linkedin, Phone, X } from 'lucide-react';
+import { Mail, Linkedin, Phone, X, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Reachout() {
@@ -12,10 +12,81 @@ export default function Reachout() {
         screeningQuestions: []
     };
 
+    const [leads, setLeads] = useState(shortlistedLeads);
     const [selectedLead, setSelectedLead] = useState(null);
     const [emailContent, setEmailContent] = useState('');
     const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
+    const [isFindingEmail, setIsFindingEmail] = useState({});
+
+    useEffect(() => {
+        // Initialize email finding state for each lead
+        const initialFindingState = {};
+        shortlistedLeads.forEach(lead => {
+            initialFindingState[lead.id || lead.full_name] = false;
+        });
+        setIsFindingEmail(initialFindingState);
+
+        // Set leads with the shortlisted ones
+        setLeads(shortlistedLeads);
+    }, [shortlistedLeads]);
+
+    const findEmail = async (lead) => {
+        const leadId = lead.id || lead.full_name;
+
+        // Set loading state for this specific lead
+        setIsFindingEmail(prev => ({ ...prev, [leadId]: true }));
+
+        try {
+            // Parse name and get domain from company
+            const nameParts = lead.full_name.split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+
+            // Extract domain from company website or use company name
+            let domain = lead.company_website;
+            if (!domain) {
+                // Create a simple domain from company name if not available
+                domain = lead.company_name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
+            }
+
+            const options = {
+                method: 'POST',
+                headers: {
+                    Authorization: `Token ${import.meta.env.VITE_GENERECT_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify([{
+                    first_name: firstName,
+                    last_name: lastName,
+                }])
+
+            };
+            console.log('Finding email for:', firstName, lastName, 'at', domain);
+
+            const response = await fetch('/api/linkedin/email_finder/', options);
+            const data = await response.json();
+            console.log('Email data:', data);
+
+            if (data && data.length > 0 && data[0].email) {
+                const updatedLeads = leads.map(l => {
+                    if ((l.id && l.id === lead.id) || (!l.id && l.full_name === lead.full_name)) {
+                        return { ...l, email: data[0].email };
+                    }
+                    return l;
+                });
+
+                setLeads(updatedLeads);
+            } else {
+                console.log('No email found for', lead.full_name);
+            }
+        } catch (error) {
+            console.error('Error finding email:', error);
+        } finally {
+            // Reset loading state
+            setIsFindingEmail(prev => ({ ...prev, [leadId]: false }));
+        }
+    };
 
     const generateEmailContent = async (lead) => {
         setIsGeneratingEmail(true);
@@ -89,11 +160,32 @@ export default function Reachout() {
                             </tr>
                         </thead>
                         <tbody>
-                            {shortlistedLeads.length > 0 ? (
-                                shortlistedLeads.map((lead, index) => (
+                            {leads.length > 0 ? (
+                                leads.map((lead, index) => (
                                     <tr key={index} className="border-t border-gray-800">
                                         <td className="py-4 px-6">
                                             <div className="font-medium text-white">{lead.full_name}</div>
+                                            <div className="text-gray-400 text-sm">
+                                                {lead.email || (
+                                                    <button
+                                                        onClick={() => findEmail(lead)}
+                                                        className="flex items-center text-blue-400 hover:text-blue-300 text-xs"
+                                                        disabled={isFindingEmail[lead.id || lead.full_name]}
+                                                    >
+                                                        {isFindingEmail[lead.id || lead.full_name] ? (
+                                                            <>
+                                                                <div className="animate-spin h-3 w-3 border-b border-white rounded-full mr-1"></div>
+                                                                Finding email...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Search size={12} className="mr-1" />
+                                                                Find email
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="py-4 px-6">
                                             <div className="flex items-center">
@@ -135,18 +227,20 @@ export default function Reachout() {
                                                     className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
                                                     title="Message on LinkedIn"
                                                     onClick={() => {
-                                                        const messageUrl = `${lead.linkedin_url.replace(/\/$/, '')}/overlay/message/`;
+                                                        const messageUrl = `${lead.linkedin_url?.replace(/\/$/, '') || '#'}/overlay/message/`;
                                                         window.open(messageUrl, '_blank');
                                                     }}
                                                 >
                                                     <Linkedin size={20} />
                                                 </button>
-                                                <button
-                                                    className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors"
-                                                    title="Call"
-                                                >
-                                                    <Phone size={20} />
-                                                </button>
+                                                <a href="tel:+1234567890" title="Call">
+                                                    <button
+                                                        className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors"
+                                                    >
+                                                        <Phone size={20} />
+                                                    </button>
+                                                </a>
+
                                             </div>
                                         </td>
                                     </tr>
@@ -216,16 +310,16 @@ export default function Reachout() {
                                 href={`https://mail.google.com/mail/?view=cm&fs=1&to=${selectedLead?.email || 'vansh.bhardwaj@kareai.io'}&su=${encodeURIComponent('Speaking Opportunity')}&body=${encodeURIComponent(emailContent)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`bg-white text-black px-4 py-2 rounded hover:bg-gray-200 transition-colors inline-block text-center ${isGeneratingEmail ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`bg-white text-black px-4 py-2 rounded hover:bg-gray-200 transition-colors inline-block text-center`}
+                                // ${isGeneratingEmail || !selectedLead?.email ? 'opacity-50 pointer-events-none' : ''}
+                                title={!selectedLead?.email ? "Find email address first" : ""}
                             >
                                 Open in Mail Client
                             </a>
-
                         </div>
                     </div>
                 </div>
-            )
-            }
-        </div >
+            )}
+        </div>
     );
 }
