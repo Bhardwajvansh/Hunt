@@ -1,13 +1,13 @@
 {
     "rewrites": [
         {
-            "source": "/api/linkedin/:path*",
-            "destination": "https://api.generect.com/api/linkedin/:path*"
+            "source": "/api/linkedin/:match*",
+            "destination": "https://api.generect.com/api/linkedin/:match*"
         }
     ],
     "headers": [
         {
-            "source": "/api/linkedin/(.*)",
+            "source": "/api/(.*)",
             "headers": [
                 {
                     "key": "Access-Control-Allow-Credentials",
