@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Mail, Linkedin, Phone, X, Search } from 'lucide-react';
+import { Mail, Linkedin, Phone, X, Search, PhoneCall } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Reachout() {
@@ -18,6 +18,10 @@ export default function Reachout() {
     const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
     const [showEmailModal, setShowEmailModal] = useState(false);
     const [isFindingEmail, setIsFindingEmail] = useState({});
+    const [showCallModal, setShowCallModal] = useState(false);
+    const [callNumber, setCallNumber] = useState('');
+    const [callStatus, setCallStatus] = useState('initializing');
+    const [callTimer, setCallTimer] = useState(0);
 
     useEffect(() => {
         // Initialize email finding state for each lead
@@ -30,6 +34,45 @@ export default function Reachout() {
         // Set leads with the shortlisted ones
         setLeads(shortlistedLeads);
     }, [shortlistedLeads]);
+
+    // Timer for call connection
+    useEffect(() => {
+        let interval;
+        if (showCallModal && callStatus !== 'connected' && callStatus !== 'failed') {
+            interval = setInterval(() => {
+                setCallTimer(prev => {
+                    const newTime = prev + 1;
+                    if (newTime === 2) setCallStatus('connecting');
+                    if (newTime === 5) setCallStatus('ringing');
+                    if (newTime === 8) setCallStatus('connected');
+                    return newTime;
+                });
+            }, 1000);
+        }
+
+        return () => clearInterval(interval);
+    }, [showCallModal, callStatus]);
+
+    const generateRandomUSPhoneNumber = () => {
+        const areaCode = Math.floor(Math.random() * 800) + 200;
+        const firstPart = Math.floor(Math.random() * 900) + 100;
+        const secondPart = Math.floor(Math.random() * 9000) + 1000;
+        return `+1 (${areaCode}) ${firstPart}-${secondPart}`;
+    };
+
+    const handleCallClick = (lead) => {
+        setSelectedLead(lead);
+        setCallNumber(generateRandomUSPhoneNumber());
+        setCallStatus('initializing');
+        setCallTimer(0);
+        setShowCallModal(true);
+    };
+
+    const closeCallModal = () => {
+        setShowCallModal(false);
+        setCallTimer(0);
+        setCallStatus('initializing');
+    };
 
     const findEmail = async (lead) => {
         const leadId = lead.id || lead.full_name;
@@ -143,6 +186,53 @@ export default function Reachout() {
         alert('Email content copied to clipboard!');
     };
 
+    // Status indicator for call modal
+    const renderCallStatus = () => {
+        switch (callStatus) {
+            case 'initializing':
+                return (
+                    <div className="flex items-center justify-center space-x-2 text-blue-400">
+                        <div className="animate-spin h-5 w-5 border-2 border-blue-400 rounded-full border-t-transparent"></div>
+                        <span>Initializing call...</span>
+                    </div>
+                );
+            case 'connecting':
+                return (
+                    <div className="flex items-center justify-center space-x-2 text-blue-400">
+                        <div className="animate-spin h-5 w-5 border-2 border-blue-400 rounded-full border-t-transparent"></div>
+                        <span>Connecting...</span>
+                    </div>
+                );
+            case 'ringing':
+                return (
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{ animationDelay: '0s' }}></div>
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" style={{ animationDelay: '0.4s' }}></div>
+                        </div>
+                        <span className="text-green-400">Ringing...</span>
+                    </div>
+                );
+            case 'connected':
+                return (
+                    <div className="flex items-center justify-center space-x-2 text-green-400">
+                        <span className="inline-block h-3 w-3 bg-green-500 rounded-full pulse"></span>
+                        <span>Connected</span>
+                    </div>
+                );
+            case 'failed':
+                return (
+                    <div className="flex items-center justify-center space-x-2 text-red-500">
+                        <X size={16} />
+                        <span>Connection failed</span>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-black text-white p-8">
             <div className="max-w-6xl mx-auto">
@@ -233,14 +323,13 @@ export default function Reachout() {
                                                 >
                                                     <Linkedin size={20} />
                                                 </button>
-                                                <a href="tel:+1234567890" title="Call">
-                                                    <button
-                                                        className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors"
-                                                    >
-                                                        <Phone size={20} />
-                                                    </button>
-                                                </a>
-
+                                                <button
+                                                    onClick={() => handleCallClick(lead)}
+                                                    className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors"
+                                                    title="Call"
+                                                >
+                                                    <Phone size={20} />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -311,12 +400,85 @@ export default function Reachout() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={`bg-white text-black px-4 py-2 rounded hover:bg-gray-200 transition-colors inline-block text-center`}
-                                // ${isGeneratingEmail || !selectedLead?.email ? 'opacity-50 pointer-events-none' : ''}
                                 title={!selectedLead?.email ? "Find email address first" : ""}
                             >
                                 Open in Mail Client
                             </a>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Call Modal */}
+            {showCallModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+                    <div className="bg-gray-900 rounded-2xl w-96 overflow-hidden shadow-2xl">
+                        <div className="relative bg-gradient-to-b from-gray-800 to-gray-900 p-8 flex flex-col items-center">
+                            {/* User avatar */}
+                            <div className="w-24 h-24 rounded-full bg-blue-600 mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                                {selectedLead?.full_name?.charAt(0) || 'U'}
+                            </div>
+
+                            <h3 className="text-xl font-medium text-white mb-1">
+                                {selectedLead?.full_name || 'User'}
+                            </h3>
+                            <p className="text-gray-400 text-sm mb-6">
+                                {selectedLead?.job_title || 'Professional'} at {selectedLead?.company_name || 'Company'}
+                            </p>
+
+                            {/* Phone number with subtle animation */}
+                            <div className="flex items-center justify-center bg-gray-800 px-4 py-2 rounded-lg mb-6 animate-pulse">
+                                <span className="text-lg font-mono text-green-400">{callNumber}</span>
+                            </div>
+
+                            {/* Call status indicator */}
+                            <div className="h-10 mb-6">
+                                {renderCallStatus()}
+                            </div>
+
+                            {/* Timer */}
+                            {callStatus === 'connected' && (
+                                <div className="text-gray-400 mb-4">
+                                    00:{callTimer < 10 ? `0${callTimer - 7}` : callTimer - 7}
+                                </div>
+                            )}
+
+                            {/* Call controls */}
+                            <div className="flex space-x-8 mt-2">
+                                {/* Microphone button */}
+                                <button className="bg-gray-800 text-gray-300 p-4 rounded-full hover:bg-gray-700 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                    </svg>
+                                </button>
+
+                                {/* End call button */}
+                                <button
+                                    onClick={closeCallModal}
+                                    className="bg-red-600 text-white p-4 rounded-full hover:bg-red-700 transition-colors"
+                                >
+                                    <PhoneCall className="h-6 w-6 transform rotate-135" />
+                                </button>
+
+                                {/* Speaker button */}
+                                <button className="bg-gray-800 text-gray-300 p-4 rounded-full hover:bg-gray-700 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <style jsx>{`
+                            @keyframes pulse {
+                                0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+                                70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+                                100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+                            }
+                            .pulse {
+                                animation: pulse 2s infinite;
+                            }
+                        `}</style>
                     </div>
                 </div>
             )}

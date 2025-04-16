@@ -54,7 +54,7 @@ export default function Hunt() {
     const [isCompaniesLoading, setIsCompaniesLoading] = useState(false);
     const [isRolesLoading, setIsRolesLoading] = useState(false);
 
-    const client = new LinkupClient({ apiKey: import.meta.env.VITE_LINKUP });
+    const client = new LinkupClient({ apiKey: import.meta.env.VITE_LINKUP_KEY });
 
     const searchCategories = [
         {
